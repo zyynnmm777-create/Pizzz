@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍕 لوحة تحكم الإدارة - الفطيرة الساخنة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif;}
+    body{background-color:#111;color:#fff;padding:20px;direction:rtl;}
+    header{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg, #1a1a1a, #800000);padding:15px 20px;border-radius:15px;border-bottom:2px solid #ff4d4d;margin-bottom:20px;}
+    h1{font-size:22px;color:#fff;}
+    .btn{padding:10px 18px;border:none;border-radius:12px;font-size:14px;font-weight:bold;cursor:pointer;background:linear-gradient(135deg, #ff4d4d, #800000);color:#fff;transition:0.2s;}
+    .btn:active{transform:scale(0.95);}
+    .btn-green{background:#2e7d32;}
+    .btn-gray{background:#333;}
+    .orders-container{display:flex;flex-direction:column;gap:15px;}
+    .order-card{background:#1b1b1b;border:1px solid #333;border-radius:16px;padding:18px;box-shadow:0 4px 15px rgba(0,0,0,0.4);}
+    .order-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #333;padding-bottom:10px;margin-bottom:12px;}
+    .order-id{font-weight:800;color:#ff4d4d;font-size:18px;}
+    .order-date{color:#888;font-size:13px;}
+    .customer-info{background:#222;padding:12px;border-radius:10px;margin-bottom:12px;font-size:14px;border:1px solid #444;}
+    .customer-info p{margin-bottom:5px;}
+    .items-list{margin-bottom:12px;font-size:14px;}
+    .item-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #333;}
+    .order-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #333;}
+    .total-price{font-size:18px;font-weight:800;color:#ff4d4d;}
+    .status-select{padding:8px 12px;border-radius:10px;background:#222;color:#fff;border:1px solid #444;font-family:'Cairo',sans-serif;font-weight:bold;cursor:pointer;}
+    .loading{text-align:center;padding:40px;color:#888;font-size:16px;}
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🍕 إدارة طلبات مطعم الفطيرة الساخنة</h1>
+    <button class="btn" onclick="fetchOrders()">🔄 تحديث الطلبات</button>
+  </header>
+
+  <div class="orders-container" id="adminOrdersList">
+    <div class="loading">جاري تحميل الطلبات من قاعدة البيانات...</div>
+  </div>
+
+  <script>
+    const binId = "6a62de31da38895dfe880c51";
+
+    const apiKey = "$2a$10$I5p9MyUI6/op7L4Y.6R/cveKjPNf5ZDUNW8niyPPwK1u0w5Pro";
+
+    function fetchOrders() {
+      let container = document.getElementById("adminOrdersList");
+      container.innerHTML = '<div class="loading">جاري تحديث الطلبات...</div>';
+
+      fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        method: 'GET',
+        headers: {
+          'X-Master-Key': apiKey,
+          'X-Access-Key': apiKey
+        }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("فشل في جلب البيانات.");
+        return response.json();
+      })
+      .then(data => {
+        let orders = [];
+        if (data && data.record) {
+          orders = Array.isArray(data.record) ? data.record : (data.record.orders || []);
+        }
+        renderAdminOrders(orders);
+      })
+      .catch(error => {
+        console.error(error);
+        container.innerHTML = '<div class="loading" style="color:#ff4d4d;">حدث خطأ أثناء جلب الطلبات. يرجى المحاولة لاحقاً.</div>';
+      });
+    }
+
+    function renderAdminOrders(orders) {
+      let container = document.getElementById("adminOrdersList");
+      if (!orders || orders.length === 0) {
+        container.innerHTML = '<div class="loading">لا توجد طلبات واردة حتى الآن.</div>';
+        return;
+      }
+
+      container.innerHTML = orders.map((o, index) => {
+        let itemsHtml = o.items.map(item => `
+          <div class="item-row">
+            <span>${item.name} ${item.selectedSize ? '(' + item.selectedSize + ' - ' + item.selectedEdge + ')' : ''} × ${item.qty}</span>
+            <span>${((Number(item.price)||0) * (Number(item.qty)||0)).toLocaleString('en-US')} ل.س</span>
+          </div>
+        `).join('');
+
+        return `
+          <div class="order-card" id="order-${o.id}">
+            <div class="order-header">
+              <span class="order-id">طلب #${String(o.id).slice(-6)}</span>
+              <span class="order-date">📅 ${o.date}</span>
+            </div>
+            
+            <div class="customer-info">
+              <p><strong>👤 الزبون:</strong> ${o.customerName || 'غير متوفر'}</p>
+              <p><strong>📞 الموبايل:</strong> <a href="tel:${o.customerPhone}" style="color:#ff4d4d; text-decoration:none;">${o.customerPhone || 'غير متوفر'}</a></p>
+              <p><strong>📍 العنوان:</strong> ${o.customerLocation || 'غير متوفر'}</p>
+            </div>
+
+            <div class="items-list">
+              <strong>🛒 تفاصيل الوجبات:</strong>
+              ${itemsHtml}
+            </div>
+
+            <div class="order-footer">
+              <div class="total-price">الإجمالي: ${(Number(o.total)||0).toLocaleString('en-US')} ل.س</div>
+              <div>
+                <label style="font-size:13px; color:#aaa; margin-left:5px;">الحالة:</label>
+                <select class="status-select" onchange="updateOrderStatus(${o.id}, this.value)">
+                  <option value="قيد المراجعة ⏳" ${o.status === 'قيد المراجعة ⏳' ? 'selected' : ''}>قيد المراجعة ⏳</option>
+                  <option value="جاري التجهيز 🔥" ${o.status === 'جاري التجهيز 🔥' ? 'selected' : ''}>جاري التجهيز 🔥</option>
+                  <option value="في طريق التوصيل 🛵" ${o.status === 'في طريق التوصيل 🛵' ? 'selected' : ''}>في طريق التوصيل 🛵</option>
+                  <option value="تم التوصيل ✅" ${o.status === 'تم التوصيل ✅' ? 'selected' : ''}>تم التوصيل ✅</option>
+                  <option value="ملغي ❌" ${o.status === 'ملغي ❌' ? 'selected' : ''}>ملغي ❌</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateOrderStatus(orderId, newStatus) {
+      fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        method: 'GET',
+        headers: {
+          'X-Master-Key': apiKey,
+          'X-Access-Key': apiKey
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        let orders = [];
+        if (data && data.record) {
+          orders = Array.isArray(data.record) ? data.record : (data.record.orders || []);
+        }
+
+        let targetOrder = orders.find(o => o.id == orderId);
+        if (targetOrder) {
+          targetOrder.status = newStatus;
+        }
+
+        return fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': apiKey
+          },
+          body: JSON.stringify({ orders: orders })
+        });
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("فشل تحديث الحالة.");
+        alert("✅ تم تحديث حالة الطلب بنجاح!");
+      })
+      .catch(error => {
+        console.error(error);
+        alert("❌ حدث خطأ أثناء تحديث الحالة.");
+      });
+    }
+
+    // جلب الطلبات تلقائياً عند فتح الصفحة
+    window.onload = function() {
+      fetchOrders();
+    };
+  </script>
+</body>
+</html>
