@@ -474,7 +474,7 @@
     <h2 id="totalPrice" style="margin-top:15px;font-size:18px"></h2>
     <p id="discountText" style="color:#ff4d4d;font-weight:bold;margin-top:5px;display:none"></p>
     
-    <button class="btn" onclick="checkout()">إتمام الطلب عبر الواتساب 🚀</button>
+    <button class="btn" onclick="checkout()">إتمام الطلب 🚀</button>
     <div id="whatsappButtonContainer" style="margin-top:10px;"></div>
   </div>
 
@@ -998,7 +998,7 @@
         items = items.filter(p => p.subcat === activeFilter);
       }
       
-      if(type === 'asc') items.sort((a,b) => (Number(a.basePrice || (activeCat==='pizza'?a.prices[currentSizeKey]:a.prices.small))||0) - (Number(b.basePrice || (activeCat==='pizza'?b.prices[currentSizeKey]:a.prices.small))||0));
+      if(type === 'asc') items.sort((a,b) => (Number(a.basePrice || (activeCat==='pizza'?a.prices[currentSizeKey]:a.prices.small))||0) - (Number(b.basePrice || (activeCat==='pizza'?a.prices[currentSizeKey]:a.prices.small))||0));
       if(type === 'desc') items.sort((a,b) => (Number(b.basePrice || (activeCat==='pizza'?b.prices[currentSizeKey]:a.prices.small))||0) - (Number(a.basePrice || (activeCat==='pizza'?b.prices[currentSizeKey]:a.prices.small))||0));
       
       renderCatProducts(items);
@@ -1244,8 +1244,7 @@
     // --- دالة إرسال الطلب إلى قاعدة البيانات (JSONBin) ---
     function sendOrderToDatabase(orderData) {
       const binId = "6a62de31da38895dfe880c51";
-
-      const apiKey = "$2a$10$I5p9MyUI6/op7L4Y.6R/cveKjPNf5ZDUNW8niyPPwK1u0w5Pro"; 
+      const apiKey = "$2a$10$SFp39MxEU6Yap7LAY.6R/uvwKjPWfBZDiBUW0miqPPwM9aGmwSPna"; 
 
       fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
           method: 'GET',
@@ -1474,7 +1473,6 @@
       renderHomeProducts();
       renderProfile();
       updateCartCounter();
-      // تم إزالة استدعاء showPage('ordersPage') الخاطئ من هنا ليعمل الموقع افتراضياً على الرئيسية
     };
   </script>
 </body>
