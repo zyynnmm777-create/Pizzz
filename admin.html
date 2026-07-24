@@ -42,6 +42,13 @@
 
   <script>
     const binId = "6a62de31da38895dfe880c51";
+// طلب كلمة المرور عند فتح صفحة الإدارة
+let password = prompt("الرجاء إدخال كلمة مرور الإدارة:");
+if (password !== "12345") { // استبدل "12345" بكلمة المرور التي تريدها
+    alert("كلمة المرور غير صحيحة!");
+    document.body.innerHTML = "<h2 style='text-align:center; color:red; margin-top:50px;'>غير مسموح بالدخول ⛔</h2>";
+    throw new Error("Unauthorized");
+}
 
     const apiKey = "$2a$10$I5p9MyUI6/op7L4Y.6R/cveKjPNf5ZDUNW8niyPPwK1u0w5Pro";
 
@@ -167,6 +174,7 @@
     window.onload = function() {
       fetchOrders();
     };
+    
   </script>
 </body>
 </html>
