@@ -1329,8 +1329,31 @@
     
 
     function renderOrders() {
-      let container = document.getElementById("ordersList");
-      if (!container) return;
+  let container = document.getElementById("ordersList");
+  if (!container) return;
+
+  container.innerHTML = '<div style="text-align:center; color:#aaa;">جاري تحديث الطلبات...</div>';
+
+  const binId = "6a62de31da38895dfe880c51";
+  const apiKey = "$2a$10$SFp39MxEU6Yap7LAY.6R/uvwKjPWfBZDiBUW0miqPPwM9aGmwSPna";
+
+  fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      method: 'GET',
+      headers: {
+          'X-Master-Key': apiKey,
+          'X-Access-Key': apiKey
+      }
+  })
+  .then(response => response.json())
+  .then(data => {
+      let remoteOrders = [];
+      if (data && data.record) {
+          remoteOrders = Array.isArray(data.record) ? data.record : (data.record.orders || []);
+      }
+      
+      // حفظ النسخة المحدثة محلياً أيضاً
+      orders = remoteOrders;
+      localStorage.setItem("orders", JSON.stringify(orders));
 
       if (orders.length === 0) {
         container.innerHTML = '<div class="empty-state">🛵 لا يوجد طلبات سابقة حتى الآن</div>';
@@ -1351,7 +1374,13 @@
       `).join('');
       
       triggerFlash('ordersPage');
-    }
+  })
+  .catch(error => {
+      console.error("خطأ في جلب الطلبات:", error);
+      container.innerHTML = '<div class="empty-state">تعذر تحميل الطلبات الحالية ⚠️</div>';
+  });
+}
+
 
     function searchProducts(value){
       let v = value.trim().toLowerCase();
