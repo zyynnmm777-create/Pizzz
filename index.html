@@ -1328,21 +1328,30 @@
     }
     
 
-    function renderOrders() {
-  let container = document.getElementById("ordersList");
-  if (!container) return;
+    
+      
+      triggerFlash('ordersPage');
+  })
+  .catch(error => {
+      console.error("خطأ في جلب الطلبات:", error);
+      container.innerHTML = '<div class="empty-state">تعذر تحميل الطلبات الحالية ⚠️</div>';
+  });
+}
 
-  container.innerHTML = '<div style="text-align:center; color:#aaa;">جاري تحديث الطلبات...</div>';
+      
+    function searchProducts(value){
+      let v = value.trim().toLowerCase();
+      let results = products.filter(p => p.name.toLowerCase().includes(v) || p.desc.toLowerCase().includes(v));
+      renderProducts(results, 'searchResults');
+    }
 
-  const binId = "6a62de31da38895dfe880c51";
-  const apiKey = "$2a$10$SFp39MxEU6Yap7LAY.6R/uvwKjPWfBZDiBUW0miqPPwM9aGmwSPna";
-
-function renderOrders() {
+    function doLogin(){
+     function renderOrders() {
   let container = document.getElementById("ordersList");
   if (!container) return;
 
   if (!user || !user.phone) {
-    container.innerHTML = '<div class="empty-state">يرجى تسجيل الدخول برقم الموبايل لعرض طلباتك 👤</div>';
+    container.innerHTML = '<div class="empty-state">👤 يرجى تسجيل الدخول وإدخال رقم الموبايل في صفحة "حسابي" لعرض طلباتك الخاصة</div>';
     return;
   }
 
@@ -1365,7 +1374,6 @@ function renderOrders() {
           remoteOrders = Array.isArray(data.record) ? data.record : (data.record.orders || []);
       }
       
-      // تصفية الطلبات بحيث تظهر فقط الخاصة برقم هاتف المستخدم الحالي
       let myOrders = remoteOrders.filter(o => o.customerPhone === user.phone);
 
       if (myOrders.length === 0) {
@@ -1386,23 +1394,14 @@ function renderOrders() {
         </div>
       `).join('');
       
-      triggerFlash('ordersPage');
+      if(typeof triggerFlash === 'function') triggerFlash('ordersPage');
   })
   .catch(error => {
       console.error("خطأ في جلب الطلبات:", error);
       container.innerHTML = '<div class="empty-state">تعذر تحميل الطلبات الحالية ⚠️</div>';
   });
 }
-
-      
-    function searchProducts(value){
-      let v = value.trim().toLowerCase();
-      let results = products.filter(p => p.name.toLowerCase().includes(v) || p.desc.toLowerCase().includes(v));
-      renderProducts(results, 'searchResults');
-    }
-
-    function doLogin(){
-      let nameEl = document.getElementById('loginName');
+ let nameEl = document.getElementById('loginName');
       let phoneEl = document.getElementById('loginPhone');
       let manualLocationEl = document.getElementById('loginLocation');
       let gpsLocationEl = document.getElementById('locationValue');
